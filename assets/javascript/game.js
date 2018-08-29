@@ -1,33 +1,42 @@
-var answer = []; //the array that displays what youve guessed and the blanks
+
 var guessedLetters = []; //what youve guessed so far
 var wordPool = ["monday","tuesday","wednesday","apple","watermelon", "raisin"]; //wordlist
 //Getting a random word from the pool
 var wordIndex = [Math.floor(Math.random()*wordPool.length)]; //random index of a word in the list
 var theWord = wordPool[wordIndex]; //the actual answer
 var wordLength = theWord.length; //how long the answer is 
+var lettersRemain = theWord.length;
 var onScreen = [wordLength]; //array of the length of the answer
-var currentGuess = "";
-var guess = "";
-var letters = theWord.split('');
-// //Number of guesses'
-var guessesLeft = 8;
-var loseCounter = 0;
-var winCounter = 0;
+var currentGuess = ""; //displayed word progress
+var guess = ""; //user input
+var letters = theWord.split(''); //individual letters of the word
 
-function resetGame() {
+var emptyWordVisible = document.getElementById("emptyWord");  //make things shorters
+var guessesLeftVisible = document.getElementById("guessesLeft");
+var guessedLettersVisible = document.getElementById("guessedLetters");
+
+var guessesLeft = 8; //number of guesses
+var loseCounter = 0; //number of losses
+var winCounter = 0; //number of wins
+
+var gameStarted = false;
+
+function resetGame()
+{   
+    gameStarted = true;
     guessesLeft = 8;
-        for (var i = 0; i < theWord.length; i++){
+    for (var i = 0; i < theWord.length; i++){
         onScreen[i] = "_ ";
         currentGuess = currentGuess + onScreen[i];
     }
-    document.getElementById("emptyWord").textContent = currentGuess;
-    document.getElementById("guessesLeft").textContent = guessesLeft + " guesses left.";
-    currentGuess = "";  
+    emptyWordVisible.textContent = currentGuess;
+    guessesLeftVisible.textContent = guessesLeft + " guesses left.";
+    currentGuess = "";
 }
 function gameStatus() {
-    if (guessesLeft > 0 && wordLength === 0) {
+    if (guessesLeft >= 0 && lettersRemain === 0) {
         gameVictory();
-    }else if (guessesLeft === 0 && wordLength){
+    }else if (guessesLeft === 0 && lettersRemain > 0){
         gameLost();
     }
 }
@@ -35,7 +44,7 @@ function gameVictory() {
         winCounter++;
         document.getElementById("won").textContent = "Won: " + winCounter;
         guessedLetters = [];
-        document.getElementById("guessedLetters").textContent = "You have guessed: " + guessedLetters;
+        guessedLettersVisible.textContent = "You have guessed: " + guessedLetters;
         resetGame();
 }
 
@@ -43,65 +52,47 @@ function gameLost() {
         loseCounter++;
         document.getElementById("lost").textContent = "Lost: " + loseCounter;
         guessedLetters = [];
-        document.getElementById("guessedLetters").textContent = "You have guessed: " + guessedLetters;
+        guessedLettersVisible.textContent = "You have guessed: " + guessedLetters;
         resetGame();
 }
 
 window.onload = function(){
     resetGame();
 }
-// var gameBegan = false;
-// var gameEnded = false;
-// //Make an array with x # of "_" to represent a blank word
-// for (var i = 0; i < word.length; i++) {
-//     answer[i] = "_";
-//     currentGuess = answer.join(" ");
-//     document.getElementById("emptyWord").textContent = currentGuess;
-//     document.getElementById("guessesLeft").textContent = guessesLeft + " guesses left!";
-// }
 
-// if (wordProgress = 0){
-//     alert("Win");
-// }else if (guessesLeft = 0){
-//     alert("You Lose");
-// }
-//main function, when a key is pressed
-
-document.onkeyup = function (event) {
+document.onkeyup = function (event)
+{
+if (gameStarted)
+    {
     guess = event.key.toLowerCase();
-    // guessesLeft--;
-    // document.getElementById("guessesLeft").textContent = guessesLeft + " guesses left!";
-    // if (guess.keyCode >= 65 && event.keyCode <= 90){
-        if (guessedLetters.indexOf(guess) === -1){
-                guessedLetters.push(guess);
-                document.getElementById("guessedLetters").textContent = "You have guessed: " + guessedLetters;
-                guessesLeft--;
-                document.getElementById("guessesLeft").textContent = guessesLeft + " guesses left!";
-            for (var i = 0; i < theWord.length; i++){
-                if (letters[i] === guess){
+    if (letters.indexOf(guess) > -1) // check if guess is in the answer
+    { 
+        if (guessedLetters.indexOf(guess) < 0) //check if the guess is already guessed
+        {  
+            for (var i = 0; i < theWord.length; i++)
+            {
+                if (letters[i] === guess)
+                {
                     onScreen[i] = guess;
-                    wordLength--;
+                    lettersRemain--;
                 }
                 currentGuess = currentGuess + onScreen[i] + " ";
+                emptyWordVisible.textContent = currentGuess;
             }
-            document.getElementById("emptyWord").textContent = currentGuess;
             currentGuess = "";
         }
+    }else   
+        {
+        if (guessedLetters.indexOf(guess) < 0) 
+            {
+                guessedLetters.push(guess);
+                guessedLettersVisible.textContent = "You have guessed: " + guessedLetters;
+                guessesLeft--;
+                guessesLeftVisible.textContent = guessesLeft + " guesses left!";
+            }
         gameStatus();
+        }
+    }else{
+        resetGame();
     }
-    // }       
-    // for (var i = 0; i < word.length; i++){
-    //     if (guessedLetters.indexOf(guess) === -1){
-    //         guessedLetters.push(guess);
-    //         document.getElementById("guessedLetters").textContent = "You have guessed: " + guessedLetters;
-    //         guessesLeft--;
-    //         document.getElementById("guessesLeft").textContent = guessesLeft + " guesses left!";
-    //     }
-    //     else if (word[i] === guess){
-    //         answer[i] = guess;
-    //         currentGuess = answer.join(" ");
-    //         wordProgress--;
-    //         document.getElementById("emptyWord").textContent = answer;
-    //     }
-    // }
-
+}
